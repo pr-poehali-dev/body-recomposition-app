@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "Get exercises list",
+      "method": "GET",
+      "path": "/?action=exercises",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get foods list",
+      "method": "GET",
+      "path": "/?action=foods",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Add meal",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "add_meal",
+        "name": "Завтрак",
+        "time": "08:00"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "created"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

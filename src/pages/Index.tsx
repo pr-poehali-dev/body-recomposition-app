@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,10 @@ import Icon from '@/components/ui/icon';
 type TabType = 'home' | 'workouts' | 'nutrition' | 'stats';
 
 interface Exercise {
-  id: string;
+  id: number;
   name: string;
   category: string;
-  muscle: string;
+  muscle_group: string;
 }
 
 interface Meal {
@@ -26,25 +26,42 @@ interface Meal {
   protein: number;
 }
 
+const API_URL = 'https://functions.poehali.dev/490cc87e-cdef-4d2c-bc3a-f629898a6281';
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [restTimer, setRestTimer] = useState<number | null>(null);
   const [timerActive, setTimerActive] = useState(false);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const exercises: Exercise[] = [
-    { id: '1', name: 'Жим штанги лёжа', category: 'Грудь', muscle: 'Грудные' },
-    { id: '2', name: 'Приседания со штангой', category: 'Ноги', muscle: 'Квадрицепсы' },
-    { id: '3', name: 'Становая тяга', category: 'Спина', muscle: 'Спина' },
-    { id: '4', name: 'Жим гантелей сидя', category: 'Плечи', muscle: 'Дельты' },
-    { id: '5', name: 'Подтягивания', category: 'Спина', muscle: 'Широчайшие' },
-  ];
+  useEffect(() => {
+    loadExercises();
+    loadMeals();
+  }, []);
 
-  const meals: Meal[] = [
-    { id: '1', name: 'Овсянка с бананом', time: '08:00', calories: 350, protein: 12 },
-    { id: '2', name: 'Куриная грудка с рисом', time: '13:00', calories: 520, protein: 45 },
-    { id: '3', name: 'Творог с орехами', time: '16:00', calories: 280, protein: 25 },
-    { id: '4', name: 'Рыба с овощами', time: '19:00', calories: 420, protein: 38 },
-  ];
+  const loadExercises = async () => {
+    try {
+      const response = await fetch(`${API_URL}?action=exercises`);
+      const data = await response.json();
+      setExercises(data.exercises || []);
+    } catch (error) {
+      console.error('Error loading exercises:', error);
+    }
+  };
+
+  const loadMeals = async () => {
+    try {
+      const response = await fetch(`${API_URL}?action=meals_today`);
+      const data = await response.json();
+      setMeals(data.meals || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading meals:', error);
+      setLoading(false);
+    }
+  };
 
   const todayStats = {
     calories: 1570,
@@ -188,7 +205,7 @@ const Index = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">{exercise.name}</h3>
-                        <p className="text-sm text-muted-foreground">{exercise.muscle}</p>
+                        <p className="text-sm text-muted-foreground">{exercise.muscle_group}</p>
                       </div>
                       <Badge variant="outline">{exercise.category}</Badge>
                     </div>
